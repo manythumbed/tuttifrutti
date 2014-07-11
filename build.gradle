@@ -1,0 +1,32 @@
+buildscript {
+	ext {
+		kotlinVersion = '0.8.11'
+	}
+
+	repositories {
+		mavenCentral()
+	}
+	dependencies {
+		classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlinVersion"
+	}
+}
+
+apply plugin: "kotlin"
+
+repositories {
+	mavenCentral()
+}
+
+test.testClassesDir = project.tasks.compileTestKotlin.destinationDir
+
+dependencies {
+	compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
+
+	testCompile 'junit:junit:4.11'
+}
+
+test {
+	testLogging {
+		exceptionFormat = 'full'
+	}
+}

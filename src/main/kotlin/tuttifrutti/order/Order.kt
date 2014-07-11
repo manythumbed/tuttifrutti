@@ -1,21 +1,33 @@
 package tuttifrutti.order
 
+import java.math.BigDecimal
+import java.math.RoundingMode
+
 data class Risk(id: String)
 
-data class Price(val amount: Double) {
+data class Price(private val price: Double) {
 	{
-		require(amount >= 0, "A price cannot be less than zero")
+		require(price >= 0, "A price cannot be less than zero")
 	}
 
-	fun add(p: Price) = Price(amount + p.amount)
+	private val internalAmount = decimal(price)
 
-	fun reduce(p: Price): Price {
-		val reducedAmount = amount - p.amount
+	val amount: Double
+		get() = internalAmount.doubleValue()
+
+	fun increase(p: Price): Price {
+		return Price(internalAmount.add(decimal(p.amount)).setScale(2, RoundingMode.HALF_UP).doubleValue())
+	}
+
+	fun decrease(p: Price): Price {
+		val reducedAmount = internalAmount.subtract(decimal(p.amount)).setScale(2, RoundingMode.HALF_UP).doubleValue()
 		return when {
 			reducedAmount >= 0 -> Price(reducedAmount)
 			else -> Price(0.0)
 		}
 	}
+
+	private fun decimal(value: Double): BigDecimal = BigDecimal(value).setScale(2, RoundingMode.HALF_UP)
 }
 
 abstract class Item(val risk: Risk, val id: String)
@@ -27,7 +39,7 @@ data class LineItem(val item: Item, val value: Price, val cost: Price) {
 		require(value.amount >= cost.amount, "A line item cannot cost more than value")
 	}
 
-	val discount = value.reduce(cost)
+	val discount = value.decrease(cost)
 }
 
 class Order {
@@ -41,12 +53,13 @@ class Order {
 		get() = orderDiscount
 
 	val value: Price
-		get() = itemSet.fold(Price(0.0)) { sum, item -> sum.add(item.value) }
+		get() = itemSet.fold(Price(0.0)) { sum, item -> sum.increase(item.value) }
 
 	val cost: Price
-		get() = itemSet.fold(Price(0.0)) { sum, item -> sum.add(item.cost) }.reduce(orderDiscount)
+		get() = itemSet.fold(Price(0.0)) { sum, item -> sum.increase(item.cost) }.decrease(orderDiscount)
 
-	val saving = value.reduce(cost)
+	val saving: Price
+		get() = value.decrease(cost)
 
 	fun add(item: Item, price: Price) {
 		withItem(item) {
@@ -60,23 +73,13 @@ class Order {
 	}
 
 	fun discount(item: Item, amount: Price) {
-		//		val i = itemSet.firstOrNull({ it.item == item })
-		//		if (i != null) {
-		//			itemSet.remove(i)
-		//			itemSet.add(LineItem(i.item, i.value, i.value.reduce(amount)))
-		//		}
 		withItem(item) {
 			itemSet.remove(it)
-			itemSet.add(LineItem(it.item, it.value, it.value.reduce(amount)))
+			itemSet.add(LineItem(it.item, it.value, it.value.decrease(amount)))
 		}
 	}
 
 	fun removeDiscount(item: Item) {
-//		val i = itemSet.firstOrNull({ it.item == item })
-//		if (i != null) {
-//			itemSet.remove(i)
-//			itemSet.add(LineItem(i.item, i.value, i.value))
-//		}
 		withItem(item) {
 			itemSet.remove(it)
 			itemSet.add(LineItem(it.item, it.value, it.value))

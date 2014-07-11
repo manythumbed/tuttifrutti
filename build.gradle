@@ -19,6 +19,7 @@ allprojects {
 	}
 
 	test.testClassesDir = project.tasks.compileTestKotlin.destinationDir
+	test.testLogging.exceptionFormat = 'full'
 
 	dependencies {
 		compile "org.jetbrains.kotlin:kotlin-stdlib:$kotlinVersion"
@@ -26,9 +27,4 @@ allprojects {
 		testCompile 'junit:junit:4.11'
 	}
 
-	test {
-		testLogging {
-			exceptionFormat = 'full'
-		}
-	}
 }

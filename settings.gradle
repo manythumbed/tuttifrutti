@@ -1,3 +1,4 @@
 rootProject.name = 'tuttifrutti'
 
 include 'order'
+include 'risk'

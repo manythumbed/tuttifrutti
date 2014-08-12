@@ -1,5 +1,7 @@
 package tuttifrutti.mapping
 
+import tuttifrutti.answers.Answer
+
 /**
  * Form -> Facts
  *
@@ -15,3 +17,4 @@ package tuttifrutti.mapping
  *
  */
 
+  val answers: List<Answer> = arrayListOf()

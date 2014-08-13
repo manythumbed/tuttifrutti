@@ -30,7 +30,7 @@ fun empty(string: String?) = if(string != null) string else ""
 private fun extractText(answers: List<Answer>, label: String): String? {
 	val answer = answers.firstOrNull() { a -> a.label == label }
 	if (answer != null && answer is Text) {
-		return answer.value
+		return answer.text
 	}
 
 	return null

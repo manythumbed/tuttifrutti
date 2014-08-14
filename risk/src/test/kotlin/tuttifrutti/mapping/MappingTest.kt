@@ -6,6 +6,8 @@ import tuttifrutti.answers.Text
 import tuttifrutti.answers.Flag
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
+import com.google.gson.GsonBuilder
+import tuttifrutti.answers.AnswerSerializer
 
 data class Person(val title: String?, val first: String, val last: String)
 
@@ -21,11 +23,11 @@ fun map(answers: List<Answer>): Person? {
 	return null
 }
 
-fun build(person: Person): List<Answer>	{
+fun build(person: Person): List<Answer> {
 	return listOf(Text(empty(person.title)), Text(person.first), Text(person.last))
 }
 
-fun empty(string: String?) = if(string != null) string else ""
+fun empty(string: String?) = if (string != null) string else ""
 
 private fun extractText(answers: List<Answer>, label: String): String? {
 	val answer = answers.firstOrNull() { a -> a.label == label }
@@ -50,11 +52,22 @@ class MappingTest() {
 		}
 	}
 
-	test fun shouldBuildAnswers()	{
+	test fun shouldBuildAnswers() {
 		val person = Person("title", "first", "last")
 
 		val answers = build(person)
 
 		assertEquals(3, answers.size)
+	}
+
+	test fun shouldWriteToJson() {
+		val gsonBuilder = GsonBuilder()
+		gsonBuilder.registerTypeAdapter(javaClass<Text>(), AnswerSerializer())
+		gsonBuilder.registerTypeAdapter(javaClass<Flag>(), AnswerSerializer())
+		val gson = gsonBuilder.create()!!
+
+		val json = gson.toJson(listOf(Text("abc", null, listOf(Flag(false))), Flag(true)))
+
+		assertEquals("", json)
 	}
 }

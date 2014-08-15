@@ -12,10 +12,60 @@ import com.google.gson.GsonBuilder
 import com.google.gson.Gson
 import com.google.gson.JsonParser
 
-abstract class Answer(val label: String?)
+abstract class Answer(val label: String?, val children: List<Answer>) {
+	abstract fun text(label: String): String?
+	abstract fun flag(label: String): Boolean?
 
-data class Text(val text: String, label: String? = null, val children: List<Answer> = listOf()) : Answer(label)
-data class Flag(val flag: Boolean, label: String? = null, val children: List<Answer> = listOf()) : Answer(label)
+	protected fun searchText(label: String): String? {
+		val found = children.map { c -> c.text(label) }.filterNotNull()
+		if (!found.empty) {
+			return found.get(0)
+		}
+
+		return null
+	}
+
+	protected fun searchFlag(label: String): Boolean? {
+		val found = children.map { c -> c.flag(label) }.filterNotNull()
+		if (!found.empty) {
+			return found.get(0)
+		}
+
+		return null
+	}
+}
+
+data class Text(val text: String, label: String? = null, children: List<Answer> = listOf()) : Answer(label, children) {
+	override fun text(label: String): String? {
+		return when (label) {
+			this.label -> text
+			else -> searchText(label)
+		}
+	}
+
+	override fun flag(label: String): Boolean? {
+		return when (label) {
+			this.label -> null
+			else -> searchFlag(label)
+		}
+	}
+}
+
+data class Flag(val flag: Boolean, label: String? = null, children: List<Answer> = listOf()) : Answer(label, children) {
+	override fun text(label: String): String? {
+		return when (label) {
+			this.label -> null
+			else -> searchText(label)
+		}
+	}
+
+	override fun flag(label: String): Boolean? {
+		return when (label) {
+			this.label -> flag
+			else -> searchFlag(label)
+		}
+	}
+}
 
 internal class AnswerSerializer : JsonSerializer<Answer> {
 	override fun serialize(src: Answer?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement? {

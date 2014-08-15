@@ -17,7 +17,7 @@ abstract class Answer(val label: String?)
 data class Text(val text: String, label: String? = null, val children: List<Answer> = listOf()) : Answer(label)
 data class Flag(val flag: Boolean, label: String? = null, val children: List<Answer> = listOf()) : Answer(label)
 
-class AnswerSerializer : JsonSerializer<Answer> {
+internal class AnswerSerializer : JsonSerializer<Answer> {
 	override fun serialize(src: Answer?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement? {
 		if (src != null && context != null) {
 			return when (src) {
@@ -57,7 +57,7 @@ class AnswerSerializer : JsonSerializer<Answer> {
 	}
 }
 
-class AnswerDeserializer() : JsonDeserializer<Answer> {
+internal class AnswerDeserializer() : JsonDeserializer<Answer> {
 	override fun deserialize(json: JsonElement?, typeOfT: Type?, context: JsonDeserializationContext?): Answer? {
 		if (json != null && context != null) {
 			val data = json.getAsJsonObject()
@@ -106,13 +106,10 @@ class AnswerDeserializer() : JsonDeserializer<Answer> {
 
 	private fun children(data: JsonObject, context: JsonDeserializationContext): List<Answer> {
 		val children = linkedListOf<Answer>()
-		val array = data.getAsJsonArray("children")
-		if (array != null) {
-			array.forEach { e ->
-				val child = context.deserialize<Answer>(e, javaClass<Answer>())
-				if (child != null) {
-					children.add(child)
-				}
+		data.getAsJsonArray("children")?.forEach { e ->
+			val child = context.deserialize<Answer>(e, javaClass<Answer>())
+			if (child != null) {
+				children.add(child)
 			}
 		}
 		return children

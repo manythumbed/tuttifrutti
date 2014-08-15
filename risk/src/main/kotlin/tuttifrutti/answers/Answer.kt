@@ -1,16 +1,17 @@
 package tuttifrutti.answers
 
-import com.google.gson.JsonElement
-import java.lang.reflect.Type
 import com.google.gson.JsonSerializer
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonObject
 import com.google.gson.JsonArray
 import com.google.gson.JsonDeserializer
+import com.google.gson.JsonElement
 import com.google.gson.JsonDeserializationContext
-import com.google.gson.GsonBuilder
 import com.google.gson.Gson
+import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
+
+import java.lang.reflect.Type
 
 abstract class Answer(val label: String?, val children: List<Answer>) {
 	abstract fun text(label: String): String?
@@ -19,7 +20,7 @@ abstract class Answer(val label: String?, val children: List<Answer>) {
 	protected fun searchText(label: String): String? {
 		val found = children.map { c -> c.text(label) }.filterNotNull()
 		if (!found.empty) {
-			return found.get(0)
+			return found.first
 		}
 
 		return null
@@ -28,7 +29,20 @@ abstract class Answer(val label: String?, val children: List<Answer>) {
 	protected fun searchFlag(label: String): Boolean? {
 		val found = children.map { c -> c.flag(label) }.filterNotNull()
 		if (!found.empty) {
-			return found.get(0)
+			return found.first
+		}
+
+		return null
+	}
+
+	fun find(label: String): Answer? {
+		if (label == this.label) {
+			return this
+		}
+
+		val found = children.map { c -> c.find(label) }.filterNotNull()
+		if (!found.empty) {
+			return found.first
 		}
 
 		return null

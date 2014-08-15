@@ -19,7 +19,7 @@ class AnswerTest {
 		}
 	}
 
-	test fun shouldSearchForFlag() {
+	test fun shouldExtractValueFromAnswer() {
 		assertEquals(null, Text("test").text("label"))
 		assertEquals(null, Text("test").flag("label"))
 		assertEquals(null, Flag(false).text("label"))
@@ -40,6 +40,16 @@ class AnswerTest {
 		assertEquals(null, answer.flag("b"))
 		assertEquals(null, answer.text("c"))
 		assertEquals(true , answer.flag("c"))
+	}
 
+	test fun shouldFindAnswer()	{
+		val answer = Text("level1", null, listOf(Flag(true, null, listOf(Text("level3a", "a"), Text("level3b", "b"), Flag(true, "c")))))
+
+		assertEquals(null, answer.find("missing"))
+		assertEquals(Text("level3a", "a"), answer.find("a"))
+		assertEquals(Text("level3b", "b"), answer.find("b"))
+		assertEquals(Flag(true, "g"), answer.find("c"))
+
+		assertEquals(Text("xyz"), Text("xyz", "b"))
 	}
 }

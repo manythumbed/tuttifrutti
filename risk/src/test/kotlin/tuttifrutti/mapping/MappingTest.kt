@@ -29,11 +29,24 @@ fun build(person: Person): List<Answer> {
 fun empty(string: String?) = if (string != null) string else ""
 
 class MappingTest() {
-	test fun shouldMapAnswers() {
+	test fun shouldMapAnswersFromSimpleStructure() {
 		val answers: List<Answer> = listOf(
 			Text("title", "person.title"),
 			Text("firstname", "person.first"),
 			Text("lastname", "person.last"),
+			Flag(true)
+		)
+
+		assertNotNull(map(answers)) { person ->
+			assertEquals(Person("title", "firstname", "lastname"), person)
+		}
+	}
+
+	test fun shouldMapAnswersFromComplexStructure() {
+		val answers: List<Answer> = listOf(
+			Flag(false, null, listOf(Text("title", "person.title"))),
+			Text("empty", "unused.label",
+				listOf(Text("firstname", "person.first"), Text("lastname", "person.last"))),
 			Flag(true)
 		)
 

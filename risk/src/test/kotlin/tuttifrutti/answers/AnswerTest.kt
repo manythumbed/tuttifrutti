@@ -5,7 +5,6 @@ import kotlin.test.assertNotNull
 import kotlin.test.assertEquals
 
 class AnswerTest {
-
 	test fun shouldSaveAndLoadViaJson() {
 		val answers = listOf(Text("abc", "x.y.z", listOf(Flag(false))), Flag(true, "p.q.r"))
 		val json = Answers.toJson(answers)
@@ -48,8 +47,6 @@ class AnswerTest {
 		assertEquals(null, answer.find("missing"))
 		assertEquals(Text("level3a", "a"), answer.find("a"))
 		assertEquals(Text("level3b", "b"), answer.find("b"))
-		assertEquals(Flag(true, "g"), answer.find("c"))
-
-		assertEquals(Text("xyz"), Text("xyz", "b"))
+		assertEquals(Flag(true, "c"), answer.find("c"))
 	}
 }

@@ -1,86 +1,148 @@
 package tuttifrutti.answers
 
 import com.google.gson.JsonSerializer
+import java.lang.reflect.Type
 import com.google.gson.JsonSerializationContext
 import com.google.gson.JsonObject
+import com.google.gson.JsonElement
 import com.google.gson.JsonArray
 import com.google.gson.JsonDeserializer
-import com.google.gson.JsonElement
 import com.google.gson.JsonDeserializationContext
 import com.google.gson.Gson
 import com.google.gson.GsonBuilder
 import com.google.gson.JsonParser
 
-import java.lang.reflect.Type
-
-abstract class Answer(val label: String?, val children: List<Answer>) {
-	abstract fun text(label: String): String?
-	abstract fun flag(label: String): Boolean?
-
-	protected fun searchText(label: String): String? {
-		val found = children.map { c -> c.text(label) }.filterNotNull()
-		if (!found.empty) {
-			return found.first
-		}
-
-		return null
-	}
-
-	protected fun searchFlag(label: String): Boolean? {
-		val found = children.map { c -> c.flag(label) }.filterNotNull()
-		if (!found.empty) {
-			return found.first
-		}
-
-		return null
-	}
-
-	fun find(label: String): Answer? {
-		if (label == this.label) {
-			return this
-		}
-
-		val found = children.map { c -> c.find(label) }.filterNotNull()
-		if (!found.empty) {
-			return found.first
-		}
-
-		return null
-	}
+trait Answer {
+	fun text(label: String): String?
+	fun flag(label: String): Boolean?
+	fun find(label: String): Answer?
 }
 
-data class Text(val text: String, label: String? = null, children: List<Answer> = listOf()) : Answer(label, children) {
+fun text(label: String, answers: List<Answer>): String? {
+	return answers.map { a -> a.text(label) }.filterNotNull().first
+}
+
+fun flag(label: String, answers: List<Answer>): Boolean? {
+	return answers.map { a -> a.flag(label) }.filterNotNull().first
+}
+
+fun find(label: String, answers: List<Answer>): Answer? {
+	return answers.map { a -> a.find(label) }.filterNotNull().first
+}
+
+data class Text(val text: String, val label: String? = null, val children: List<Answer> = listOf()) : Answer {
 	override fun text(label: String): String? {
 		return when (label) {
 			this.label -> text
-			else -> searchText(label)
+			else -> text(label, children)
 		}
 	}
 
 	override fun flag(label: String): Boolean? {
 		return when (label) {
 			this.label -> null
-			else -> searchFlag(label)
+			else -> flag(label, children)
+		}
+	}
+
+	override fun find(label: String): Answer? {
+		return when (label) {
+			this.label -> this
+			else -> find(label, children)
 		}
 	}
 }
 
-data class Flag(val flag: Boolean, label: String? = null, children: List<Answer> = listOf()) : Answer(label, children) {
+data class Flag(val flag: Boolean, val label: String? = null, val children: List<Answer> = listOf()) : Answer {
 	override fun text(label: String): String? {
 		return when (label) {
 			this.label -> null
-			else -> searchText(label)
+			else -> text(label, children)
 		}
 	}
 
 	override fun flag(label: String): Boolean? {
 		return when (label) {
 			this.label -> flag
-			else -> searchFlag(label)
+			else -> flag(label, children)
+		}
+	}
+
+	override fun find(label: String): Answer? {
+		return when (label) {
+			this.label -> this
+			else -> find(label, children)
 		}
 	}
 }
-
+//abstract class Answer(val label: String?, val children: List<Answer>) {
+//	abstract fun text(label: String): String?
+//	abstract fun flag(label: String): Boolean?
+//
+//	protected fun searchText(label: String): String? {
+//		val found = children.map { c -> c.text(label) }.filterNotNull()
+//		if (!found.empty) {
+//			return found.first
+//		}
+//
+//		return null
+//	}
+//
+//	protected fun searchFlag(label: String): Boolean? {
+//		val found = children.map { c -> c.flag(label) }.filterNotNull()
+//		if (!found.empty) {
+//			return found.first
+//		}
+//
+//		return null
+//	}
+//
+//	fun find(label: String): Answer? {
+//		if (label == this.label) {
+//			return this
+//		}
+//
+//		val found = children.map { c -> c.find(label) }.filterNotNull()
+//		if (!found.empty) {
+//			return found.first
+//		}
+//
+//		return null
+//	}
+//}
+//
+//data class Text(val text: String, label: String? = null, children: List<Answer> = listOf()) : Answer(label, children) {
+//	override fun text(label: String): String? {
+//		return when (label) {
+//			this.label -> text
+//			else -> searchText(label)
+//		}
+//	}
+//
+//	override fun flag(label: String): Boolean? {
+//		return when (label) {
+//			this.label -> null
+//			else -> searchFlag(label)
+//		}
+//	}
+//}
+//
+//data class Flag(val flag: Boolean, label: String? = null, children: List<Answer> = listOf()) : Answer(label, children) {
+//	override fun text(label: String): String? {
+//		return when (label) {
+//			this.label -> null
+//			else -> searchText(label)
+//		}
+//	}
+//
+//	override fun flag(label: String): Boolean? {
+//		return when (label) {
+//			this.label -> flag
+//			else -> searchFlag(label)
+//		}
+//	}
+//}
+//
 internal class AnswerSerializer : JsonSerializer<Answer> {
 	override fun serialize(src: Answer?, typeOfSrc: Type?, context: JsonSerializationContext?): JsonElement? {
 		if (src != null && context != null) {

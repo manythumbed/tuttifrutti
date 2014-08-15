@@ -6,14 +6,14 @@ import tuttifrutti.answers.Text
 import tuttifrutti.answers.Flag
 import kotlin.test.assertEquals
 import kotlin.test.assertNotNull
-import tuttifrutti.answers.Answers
+import tuttifrutti.answers.text
 
 data class Person(val title: String?, val first: String, val last: String)
 
 fun map(answers: List<Answer>): Person? {
-	val title = extractText(answers, "person.title")
-	val first = extractText(answers, "person.first")
-	val last = extractText(answers, "person.last")
+	val title = text("person.title", answers)
+	val first = text("person.first", answers)
+	val last = text("person.last", answers)
 
 	if (first != null && last != null) {
 		return Person(title, first, last)
@@ -23,19 +23,10 @@ fun map(answers: List<Answer>): Person? {
 }
 
 fun build(person: Person): List<Answer> {
-	return listOf(Text(empty(person.title)), Text(person.first), Text(person.last))
+	return listOf(Text(empty(person.title), "person.title"), Text(person.first, "person.first"), Text(person.last, "person.first"))
 }
 
 fun empty(string: String?) = if (string != null) string else ""
-
-private fun extractText(answers: List<Answer>, label: String): String? {
-	val answer = answers.firstOrNull() { a -> a.label == label }
-	if (answer != null && answer is Text) {
-		return answer.text
-	}
-
-	return null
-}
 
 class MappingTest() {
 	test fun shouldMapAnswers() {

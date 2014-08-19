@@ -6,7 +6,7 @@ class BuilderTest	{
 	test fun shouldAllowFieldsToBeSpecified()	{
 		val person = Group(listOf(Words("First", "first"), Words("Last", "last")), "person")
 
-		val choice = Choice(listOf(
+		val choice = Choice("What?", listOf(
 			Code("Animal", "AN", listOf(Words("Species", "species"), Words("Name", "name"))),
 			Code("Vegetable", "VT"),
 			Code("Mineral", "MN"),

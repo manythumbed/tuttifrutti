@@ -12,6 +12,17 @@ class BuilderTest	{
 			Code("Mineral", "MN"),
 			Code("Other", "ZZ", listOf(Words("Description", "choice.description")))
 		), "choice")
+
+		val yes = Code("Yes", "YES")
+		val no = Code("No", "NO")
+
+		val confirm = Confirmation("Happy?", yes, no, yes.code)
+
+		val collection = Collection(listOf(confirm, confirm))
+
+		val group = Group(listOf(person, choice, confirm, collection))
+
+
 	}
 }
 

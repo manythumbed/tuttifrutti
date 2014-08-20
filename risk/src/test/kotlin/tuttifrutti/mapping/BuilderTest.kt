@@ -1,6 +1,8 @@
 package tuttifrutti.mapping
 
 import org.junit.Test as test
+import kotlin.test.failsWith
+import kotlin.test.assertNotNull
 
 class BuilderTest	{
 	test fun shouldAllowFieldsToBeSpecified()	{
@@ -22,7 +24,20 @@ class BuilderTest	{
 
 		val group = Group(listOf(person, choice, confirm, collection))
 
+		assertNotNull(group)
+	}
 
+	test fun shouldNotAllowIncorrectConfirmations()	{
+		val yes = Code("Yes", "YES")
+		val no = Code("No", "NO")
+
+		failsWith(javaClass<IllegalArgumentException>())	{
+			Confirmation("Can't have same codes", yes, yes, yes.code)
+		}
+
+		failsWith(javaClass<IllegalArgumentException>())	{
+			Confirmation("Positive must be one of codes", yes, no, "unknown")
+		}
 	}
 }
 
